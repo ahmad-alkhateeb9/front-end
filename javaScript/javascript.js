@@ -1,28 +1,28 @@
-// get inupt 
-let input = document.querySelector(".search-box input");
-let searchBox = document.querySelector(".search-box");
-let searchButton = document.querySelector(".main .search-box .shorten");
-let urlContainer = document.querySelector(".url-content");//adding shorten url to the madin div
-let notValidMessege = "please add a link";
-let notValidSpan = document.querySelector('.not-valied-input');
-let url = document.querySelector(".url-box .url");
-let shorterUrl = document.querySelector(".url-box .url");
-let copied = "Copied!";
+// get inupt
+const input = document.querySelector(".search-box input");
+const searchBox = document.querySelector(".search-box");
+const searchButton = document.querySelector(".main .search-box .shorten");
+const urlContainer = document.querySelector(".url-content");//adding shorten url to the madin div
+const notValidMessege = "please add a link";
+const notValidSpan = document.querySelector('.search-box .not-valid-input');
+const url = document.querySelector(".url-box .url");
+const shorterUrl = document.querySelector(".url-box .url");
+const copied = "Copied!";
 
-let face = "www.facebook.com";
 
 let generated = 1;
 //focus on input
 searchButton.onclick = function () {
-    validInput();
+    // SendvalidInput();
 
     // if the input not valid
     if (input.value == '') {
-        notValidInput();
+        SendnotValidInput();
     }
     //valid input
 
     else {
+        SendvalidInput();
         fetch(`https://api.shrtco.de/v2/shorten?url=${input.value}`, {
             // mode: 'no-cors',
         })
@@ -45,6 +45,24 @@ searchButton.onclick = function () {
                     theCopyButton.appendChild(theCopyButtonText);
                     theCopyButton.classList.add('copy-url');
 
+                    //clicked copy function
+                    theCopyButton.addEventListener("click", function (event) {
+                        console.log('it pressed me');
+                        event.target.classList.add('copied');
+                        event.target.innerHTML = "Copied";
+                        let url = document.querySelectorAll(".url-content .shorten-url");
+                        url.forEach(element => {
+                            if (element.getAttribute('data-index') == event.target.getAttribute('data-index')) {
+                                console.log(element.innerHTML);
+                                navigator.permissions.query({ name: "clipboard-write" }).then((result) => {
+                                    if (result.state === "granted" || result.state === "prompt") {
+                                        navigator.clipboard.writeText(element.innerHTML);
+                                    }
+                                });
+                            }
+                        })
+                    })
+
                     // span for copy button
                     let spanShortenUrl = document.createElement('span');
                     let theUrlShorter = document.createTextNode(data.result.short_link);
@@ -52,73 +70,39 @@ searchButton.onclick = function () {
                     spanShortenUrl.appendChild(theUrlShorter);
                     spanShortenUrl.classList.add('shorten-url');
 
+                    //add div for shorten url and copybutton
+                    let divContainer = document.createElement('div');
+                    divContainer.classList.add('shorten-controller');
+
+                    //add them to the div
+                    divContainer.appendChild(spanShortenUrl)
+                    divContainer.appendChild(theCopyButton)
+
                     //add them to the container
                     spanMain.appendChild(spanUrl);
-                    spanMain.appendChild(theCopyButton);
-                    spanMain.appendChild(spanShortenUrl);
+                    spanMain.appendChild(divContainer);
 
                     //add main span to the box
                     urlContainer.appendChild(spanMain);
                 }
-                catch {
-                    notValidInput();
+                catch (e) {
+                    console.log(e)
+                    SendnotValidInput();
                 }
             }
-
                 // getLinks();
             )
     }
 
-
-
     //valid the design
-    function validInput() {
-        notValidSpan.textContent = "";
+    function SendvalidInput() {
+        notValidSpan.classList.remove('hidden')
         input.classList.remove('not-valid');
     }
-//test delete span not valid
-    document.addEventListener("click", function (event) {
-        if (event.target.className === "shorten") {
-            //TODO
-           //i must delete the span element here
-            spanElement.innerHTML = "";
-        }
-    })
 
     //not valid design
-    function notValidInput() {
-        let notValid = document.createElement('span');
-        let notValidText = document.createTextNode("please add a link");
-        notValid.appendChild(notValidText);
-        notValid.classList.add('not-valied-input');
-        searchBox.appendChild(notValid);
+    function SendnotValidInput() {
+        notValidSpan.classList.add('hidden');
         input.classList.add('not-valid');
     }
-
-    //get links
-    function getLinks() {
-        console.log('function get links');
-    }
-
 }
-//get all copied numbers
-let copyButton = document.querySelectorAll(".url-content .copy-url");
-
-
-//clicked copy function
-document.addEventListener("click", function (event) {
-    if (event.target.className === "copy-url") {
-        console.log('it pressed me');
-        event.target.classList.add('copied');
-        event.target.innerHTML = "Copied";
-        let url = document.querySelectorAll(".url-content .shorten-url");
-        url.forEach(element => {
-            if (element.getAttribute('data-index') == event.target.getAttribute('data-index')) {
-                console.log(element.innerHTML);
-            }
-        })
-    }
-})
-//facebook.com
-//twitter.com
-// click on copy button
